@@ -688,3 +688,4 @@ while alive==True:
    time.sleep(1)
    newencounter()
 print("You died!")
+time.sleep(10)
