@@ -115,7 +115,11 @@ def ehit():
    if cenemy.especial1==2 or (cenemy.especial1==4 and random.randint(1,3)==3): 
     damagedealt=round(damage(cenemy.emag*edamagemult,pmag+citem.imag+carmour.imag))
    else:
+     if estatus==2:
+       edamagemult/=2
      damagedealt =round(damage(cteatk*edamagemult,ctpdef))
+     if estatus==2:
+       edamagemult*=2
    if crit:
     edamagemult/=3
     crit=False
@@ -146,7 +150,8 @@ def ehit():
   
   else:
     print(f"The {cenemy.name} did nothing....")
-    efrozen-=1
+    if efrozen<0:
+     efrozen-=1
   hpcheck()
 def chest():
   global gold,citem,cenemy,ehp,turncount,alive,enemy,php
@@ -163,7 +168,7 @@ def chest():
        newencounter()
      elif x<=3:
        os.system("clear")
-       x=random.randint(1,13)
+       x=random.randint(1,14)
        if x ==1:
          y=ironswrd
        elif x==2:
@@ -190,6 +195,8 @@ def chest():
          y=toxdagger
        elif x == 13:
          y=silverblade
+       elif x == 14:
+         y=smokebomb
        print(f"It contained a {y.name}!")
        if y.equippable:
          valid = False
@@ -360,6 +367,29 @@ def newencounter():
     print(f"Your max hp is now {pmaxhp}")
     if php<pmaxhp:
      php=pmaxhp
+    if random.randint(1,4)==4:
+      valid = False
+      while not valid:
+       y=random.randint(1,7)
+       if y==1:
+         newspell=heal
+       elif y==2:
+         newspell=meteorstrike
+       elif y==3:
+         newspell=lifedrain
+       elif y==4:
+         newspell=judgement
+       elif y==5:
+         newspell=thunderbolt
+       elif y==6:
+         newspell=fireball
+       elif y==7:
+         newspell=magicmissile
+       if not newspell in spells:
+         valid = True
+         spells.append(newspell)
+         print(f"You learned {newspell.name}!")
+         
    time.sleep(1)
   enemy=False
   if not run:
@@ -379,7 +409,7 @@ def newencounter():
      gamble()
   else:
    enemy=True
-   z=random.randint(1,18)
+   z=random.randint(1,19)
    if z ==1:
     cenemy= bees
    elif z==2:
@@ -419,7 +449,7 @@ def newencounter():
    elif y ==19:
      cenemy=mercenary
    ehp=cenemy.emaxhp
-   print(f"You encountered a {cenemy.name}! You have {php} hp")
+   print(f"You encountered a {cenemy.name}! You have {php}/{pmaxhp} hp")
    turncount=0
 def bombshop():
   global gold
@@ -433,10 +463,15 @@ def bombshop():
         choice2 = input(f"She seems to be selling bombs for 60 gold. You have {gold} gold. Buy one? (y/n) ")
         if choice2 =="y":
           if gold>=60:
-            if random.randint(1,4)==4:
-              inventory.append(icebomb)
-            else:
-             inventory.append(bomb)
+            x=random.randint(1,6)
+            if x<=3:
+              inventory.append(bomb)
+            elif x==4:
+             inventory.append(icebomb)
+            elif x==5:
+              inventory.append(toxbomb)
+            elif x==6:
+              inventory.append(smokebomb)
             gold-=60
             bought+=1
           else:
@@ -477,12 +512,20 @@ def shop():
     elif choice == 3:
       if gold >= 50:
         gold-=50
-        php=pmaxhp
-        os.system("clear")
-        print("You were healed to full")
-        if pstatus!=0:
-          pstatus=0
-          print("Your status was cured!")
+        hchoice=""
+        while hchoice != "y" and hchoice!="n":
+          hchoice=input("Drink it now? (y/n) ").lower()
+        if hchoice=="y":
+          php=pmaxhp
+          os.system("clear")
+          print("You were healed to full")
+          if pstatus!=0:
+            pstatus=0
+            print("Your status was cured!")
+        else:
+          inventory.append(healpot)
+          os.system("clear")
+          print("You put it in your inventory")
       else:
         os.system("clear")
         print("Insufficient gold")
@@ -590,48 +633,25 @@ def spellchoice():
   global cspell, magic
   valid = False
   while not valid:
-    choice = input(f"What spell will you use? You have {pmana} mana. 1: Magic Missile ({magicmissile.spmanacost+citem.manacostmod+carmour.manacostmod} Mana) 2: Heal ({heal.spmanacost+citem.manacostmod+carmour.manacostmod} Mana) 3: Meteor Strike ({meteorstrike.spmanacost+citem.manacostmod+carmour.manacostmod} Mana) 4: Life Drain ({lifedrain.spmanacost+citem.manacostmod+carmour.manacostmod} Mana)\n5: Judgement ({judgement.spmanacost+citem.manacostmod+carmour.manacostmod} Mana) 6: None ")
-    if choice == "1":
-      if pmana >=magicmissile.spmanacost+citem.manacostmod+carmour.manacostmod:
-       cspell =magicmissile
+    
+    for i in range(len(spells)):
+      print(f"{i+1}: {spells[i].name} ({spells[i].spmanacost+citem.manacostmod+carmour.manacostmod} mana)")
+    choice = int(input(f"What spell will you use? You have {pmana} mana. 0 to exit "))-1
+    if choice == -1:
+        os.system("clear")
+        valid = True
+        movechoice()
+    elif choice <= len(spells)-1:
+      if pmana >=spells[choice].spmanacost+citem.manacostmod+carmour.manacostmod:
+       cspell =spells[choice]
        magic = True
        valid = True
       else:
         print("Insuffient mana")
-    elif choice == "2":
-      if pmana >=heal.spmanacost+citem.manacostmod+carmour.manacostmod:
-       cspell =heal
-       magic = True
-       valid = True
-      else:
-        print("Insuffient mana")
-    elif choice == "3":
-      if pmana >=meteorstrike.spmanacost+citem.manacostmod+carmour.manacostmod:
-       cspell =meteorstrike
-       magic = True
-       valid = True
-      else:
-        print("Insuffient mana")
-    elif choice == "4":
-      if pmana >=lifedrain.spmanacost+citem.manacostmod+carmour.manacostmod:
-       cspell =lifedrain
-       magic = True
-       valid = True
-    elif choice == "5":
-      if pmana >=judgement.spmanacost+citem.manacostmod+carmour.manacostmod:
-       cspell =judgement
-       magic = True
-       valid = True
-      else:
-        print("Insuffient mana")
-    elif choice == "6":
-      os.system("clear")
-      valid = True
-      movechoice()
     if magic == True:
       pmaghit()
 def pmaghit():
-    global ehp, pdamagemult,crit,ctpdef,cteatk,pmag,emag,magic,pmana,citem,php,efrozen,pstatus,carmour
+    global ehp, pdamagemult,crit,ctpdef,cteatk,pmag,emag,magic,pmana,citem,php,efrozen,pstatus,carmour,estatus
     attacks=1
     print(f"You used {cspell.name}!")
     if cspell.spdamage>0:
@@ -654,6 +674,9 @@ def pmaghit():
       if citem.ispecial==3 and random.randint(1,3)==3:
        efrozen+=1
        print(f"The {cenemy.name} was frozen!")
+      if cspell.spspecial==4 and random.randint(1,3)==3 and estatus ==0:
+        print(f"The {cenemy.name} was burned!")
+        estatus=2
       if crit:
        pdamagemult/=3
        crit=False
@@ -733,9 +756,19 @@ def movechoice():
          valid = True
        elif inventory[choice].ispecial==3:
          php+=inventory[choice].iheal
+         if inventory[choice]==healpot and pstatus!=0:
+           pstatus=0
+           print("Your staus was cured!")
          print(f"You now have {php} hp")
          inventory.pop(choice)
          valid=True
+       elif inventory[choice].ispecial==15:
+         os.system("clear")
+         print("You escaped!")
+         run=True
+         enemy=False
+         inventory.pop(choice)
+         newencounter()
        elif inventory[choice].ispecial==4 or inventory[choice].ispecial==12 or inventory[choice].ispecial==14:
          print(f"You used the {inventory[choice].name}")
          if random.randint(1,25)==10:
@@ -763,6 +796,8 @@ def movechoice():
             break
        else:
          print("Nothing happened")
+     else:
+       os.system("clear")    
 def gamble():
   global gold
   choice=""
@@ -837,6 +872,7 @@ bloodvial=itemstats("Blood Vial",0,0,30,3,0,False,0,20,0)
 bomb=itemstats("Bomb",50,0,30,4,0,False,0,0,0)
 icebomb=itemstats("Ice Bomb",10,0,60,12,0,False,0,0,0)
 toxbomb=itemstats("Toxic Bomb",5,0,40,14,0,False,0,0,0)
+smokebomb=itemstats("Smoke Bomb",0,0,60,15,0,False,0,0,0)
 bow = itemstats("Bow",7,0,35,5,0,True,0,0,1)
 crossbow = itemstats("Bow",12,0,75,5,0,True,0,0,1)
 honey = itemstats("Honey",0,0,20,3,0,False,0,10,0)
@@ -852,7 +888,8 @@ platearmour=itemstats("Plate Armour",0,15,100,0,0,True,1,0,2)
 plasmasword=itemstats("Plasma Sword",14,1,100,10,0,True,0,0,1)
 spikybarb=itemstats("Spiky Barb",0,0,0,11,0,False,0,0,0)
 toxdagger=itemstats("Toxic Dagger",13,0,75,12,0,True,0,0,1)
-silverblade=itemstats("Silver Blade",10,1,75,13,2,True,0,0,2)
+silverblade=itemstats("Silver Blade",10,1,75,13,2,True,0,0,1)
+healpot = itemstats("Health Potion",0,0,40,3,0,False,0,20,0)
 nothing=itemstats("Nothing",0,0,0,0,0,True,0,0,0)
 bees = enemystats("Bee Swarm",17,5,10,15,25,0,0,honey,4)
 skeleton = enemystats("Skeleton",20,7,17,10,50,0,0,bone,3)
@@ -875,10 +912,12 @@ spikeball=enemystats("Spike Ball",15,15,20,30,30,10,0,spikybarb,5)
 demon=enemystats("Demon",20,15,40,60,60,4,2,0,25)
 mercenary=enemystats("Mercenary",20,10,30,70,50,0,0,crossbow,10)
 magicmissile = spellstats("Magic Missile",5,0,3,0)
+thunderbolt = spellstats("Thunderbolt",7,0,4,0)
 heal=spellstats("Heal",0,round(pmaxhp/2),5,2)
 meteorstrike = spellstats("Meteor Strike",30,0,8,0)
 lifedrain=spellstats("Life Drain",15,0,6,1)
 judgement = spellstats("Judgement",0,0,20,3)
+fireball= spellstats("Fireball",10,0,5,4)
 thing=bees
 alive = True
 magic = False
@@ -898,12 +937,16 @@ turncount=0
 pstatus =0
 estatus = 0
 crit=False
-gold=0
-xp=0
+gold=50
+xp=1
 level=1
 pmana=pmaxmana
 php=pmaxhp
-inventory=[toxbomb]
+inventory=[]
+if pclass==2:
+ spells=[magicmissile]
+else:
+  spells=[]
 if pclass==3:
   citem=bow
 else:
@@ -940,8 +983,12 @@ while alive==True:
      break
  run=False
  if estatus==1:
-  ehp -= round(cenemy.emaxhp/10)
-  print(f"The {cenemy.name} took {round(cenemy.emaxhp/6)} poison damage! It now has {ehp} hp") 
+  ehp -= round(cenemy.emaxhp/6)
+  print(f"The {cenemy.name} took {round(cenemy.emaxhp/6)} poison damage! It now has {ehp} hp")
+ elif estatus==2:
+   ehp-= round(cenemy.emaxhp/8)
+   print(f"The {cenemy.name} took {round(cenemy.emaxhp/8)} burn damage! It now has {ehp} hp")
+    
  if alive:
   if ehp<=0:
    print("You won!")
