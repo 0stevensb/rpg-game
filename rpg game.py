@@ -15,18 +15,22 @@ class enemystats():
         self.itemdrop=itemdrop
         self.emag=emag
 class itemstats():
-  def __init__(self,name,iatk,idef,goldcst,ispecial,imag,equippable,manacstmod,iheal,itype):
+  def __init__(self,name,iatk,idef,goldcst,ispecial1,ispecial2,imag,equippable,manacstmod,iheal,itype,components,plus,imana):
     self.name=name
     self.type =2
     self.iatk=iatk
     self.idef=idef
     self.goldcst=goldcst
-    self.ispecial=ispecial
+    self.ispecial1=ispecial1
+    self.ispecial2=ispecial2
     self.imag = imag
     self.equippable=equippable
     self.manacostmod=manacstmod
     self.iheal=iheal
     self.itype = itype
+    self.components=components
+    self.plus=plus
+    self.imana=imana
 class spellstats():
   def __init__(self,name,spdamage,spheal,spmanacost,spspecial):
     self.name=name
@@ -54,49 +58,57 @@ def damage(atk,defence):
     d=  (atk - defence)
     return d
 def phit():
-    global ehp, pdamagemult,crit,ctpdef,cteatk,pstatus,efrozen,estatus,php
+    global ehp, pdamagemult,crit,ctpdef,cteatk,pstatus,efrozen,estatus,php,pmag
     ctpatk=patk+citem.iatk+patkmod+carmour.iatk
     ctpdef=pdef+citem.idef+pdefmod+carmour.idef
     cteatk=cenemy.eatk+eatkmod
     ctedef=cenemy.edef + edefmod
     attacks=1
-    if citem.ispecial==1:
+    if citem.ispecial1==1:
       attacks+=1
     for i in range(attacks):
-     if (random.randint(1,25)==10 and citem.ispecial!=7) or (random.randint(1,5)==5 and citem.ispecial==7):
+     if (random.randint(1,25)==10 and citem.ispecial1!=7) or (random.randint(1,5)==5 and citem.ispecial1==7):
       pdamagemult*=3
       crit=True
       print("Critical hit!")
-     if citem.ispecial==13 and cenemy.especial2==2:
+     if citem.ispecial1==13 and cenemy.especial2==2:
        pdamagemult*=2
-     if citem.ispecial==9:
+     if citem.ispecial1==9:
        damagedealt=round(damage(round((ctpatk+pmag+citem.imag+carmour.imag)/2)*pdamagemult,round((ctedef+cenemy.emag)/2)))
-     elif citem.ispecial==10:
+     elif citem.ispecial1==10:
        damagedealt =round(damage(ctpatk*pdamagemult,cenemy.emag))
+     elif citem.ispecial1==15:
+       damagedealt=round(damage(pmag+citem.imag+carmour.imag*pdamagemult,cenemy.emag))
      else:
        damagedealt =round(damage(ctpatk*pdamagemult,ctedef))
      if crit:
       pdamagemult/=3
       crit=False
-     if citem.ispecial==13 and cenemy.especial2==2:
+     if random.randint(1,2)==1 and citem.ispecial2==1:
+         estatus=2
+         print(f"The {cenemy.name} was burned!")
+     if citem.ispecial1==13 and cenemy.especial2==2:
       pdamagemult/=2
-     if damagedealt<0 or cenemy.especial1==8:
+     if damagedealt<0 or (cenemy.especial1==8 and citem.ispecial1!=15):
       damagedealt =0
      print(f"You dealt {damagedealt} damage!")
      ehp-=damagedealt
-     if cenemy.especial1==6 and random.randint(1,4)==1 and pstatus==0 and citem.ispecial!=5:
+     if cenemy.especial1==6 and random.randint(1,4)==1 and pstatus==0 and citem.ispecial1!=5 and citem.ispecial1!=15:
       print("You were poisoned!")
       pstatus = 1
-     if cenemy.especial1==10 and citem.ispecial!=5:
+     if cenemy.especial1==10 and citem.ispecial1!=5:
        php-=5
        print(f"You took 5 damage due to spikes! You now have {php} hp")
        hpcheck()
-     if citem.ispecial==8 and random.randint(1,3)==3 and cenemy.especial2!=1 and cenemy.especial1!=8:
+     if citem.ispecial1==8 and random.randint(1,3)==3 and cenemy.especial2!=1 and cenemy.especial1!=8:
        efrozen+=1
        print(f"The {cenemy.name} was frozen!")
-     if citem.ispecial==12 and cenemy.especial1!=6 and random.randint(1,3)==2 and estatus==0 and cenemy.especial1!=8:
+     if citem.ispecial1==12 and cenemy.especial1!=6 and random.randint(1,3)==2 and estatus==0 and cenemy.especial1!=8:
        estatus=1
        print(f"The {cenemy.name} was poisoned!")
+     if citem.ispecial1==14:
+       php+=round(damagedealt/2)
+       print(f"You healed {round(damagedealt/2)}hp!")
      print(f"The {cenemy.name} now has {ehp} hp")
      if ehp<=0:
        break
@@ -316,7 +328,7 @@ def newencounter():
   efrozen=0
   estatus=0
   if enemy:
-   if citem.ispecial==6:
+   if citem.ispecial1==6:
     php+=round(cenemy.emaxhp/4)
     print(f"You healed {round(cenemy.emaxhp/4)} hp! You now have {php} hp")
    edamagemult=1
@@ -369,7 +381,11 @@ def newencounter():
     print(f"Your max hp is now {pmaxhp}")
     if php<pmaxhp:
      php=pmaxhp
-    if random.randint(1,4)==4:
+    if pclass==2:
+     g=random.randint(1,3)
+    else:
+      g=random.randint(1,4)
+    if g==1 and len(spells)<10:
       valid = False
       while not valid:
        y=random.randint(1,10)
@@ -404,20 +420,27 @@ def newencounter():
    os.system("cls")
   y= random.randint(1,6)
   if y==1:
-    y=random.randint(1,7)
+    if pick in inventory or citem==pick:
+     y=random.randint(1,10)
+    else:
+      y=random.randint(1,9)
     if y<=2:
      shop()
     elif y<=4:
       chest()
-    elif y==5:
-      bombshop()
-    elif y==6:
-      fishinghole()
+    elif y<=6:
+      workshop()
     elif y==7:
+      bombshop()
+    elif y==8:
+      fishinghole()
+    elif y==9:
      gamble()
+    elif y==10:
+      mine()
   else:
    enemy=True
-   z=random.randint(1,19)
+   z=random.randint(1,21)
    if z ==1:
     cenemy= bees
    elif z==2:
@@ -450,15 +473,30 @@ def newencounter():
      cenemy=icegolem
    elif z == 16:
      cenemy=assassin
-   elif y==17:
+   elif z==17:
      cenemy=spikeball
-   elif y==18:
+   elif z==18:
      cenemy=demon
-   elif y ==19:
+   elif z ==19:
      cenemy=mercenary
+   elif z==20:
+     cenemy=ent
+   elif z ==21:
+     cenemy=miner
    ehp=cenemy.emaxhp
    print(f"You encountered a {cenemy.name}! You have {php}/{pmaxhp} hp")
    turncount=0
+def mine():
+  print("You found a large deposit of various ores!")
+  for x in range(random.randint(2,5)):
+   inventory.append(iron)
+  for x in range(random.randint(1,3)):
+    inventory.append(silver)
+  for x in range(3):
+    inventory.append(coal)
+  time.sleep(1)
+  os.system("cls")
+  newencounter()
 def bombshop():
   global gold
   choice=""
@@ -494,13 +532,14 @@ def bombshop():
      newencounter()
 def shop():
   global gold,xp,patk,php,pmaxhp,citem,pstatus,carmour
+  os.system("cls")
   print("You found a shop!")
   exit = False
   stock=[]
   for x in range(6):
       valid = False
       while not valid:
-        y=random.randint(1,15)
+        y=random.randint(1,17)
         if y==1:
           newitem=healpot
         elif y==2:
@@ -531,6 +570,12 @@ def shop():
           newitem=gun
         elif y==15:
           newitem=cloak
+        elif y==16:
+          newitem=mace
+        elif y==17:
+          newitem=manacrystal
+        elif y==18:
+          newitem=manapot
         if newitem not in stock:
           stock.append(newitem)
           valid = True
@@ -609,7 +654,7 @@ def spellchoice():
     if magic == True:
       pmaghit()
 def pmaghit():
-    global ehp, pdamagemult,crit,ctpdef,cteatk,pmag,emag,magic,pmana,citem,php,efrozen,pstatus,carmour,estatus,pmagdefmod
+    global ehp, pdamagemult,crit,ctpdef,cteatk,pmag,emag,magic,pmana,citem,php,efrozen,pstatus,carmour,estatus,pmagdefmod,pdefmod
     attacks=1
     print(f"You used {cspell.name}!")
     if cspell.spdamage>0:
@@ -629,7 +674,7 @@ def pmaghit():
         if php>pmaxhp:
           php=pmaxhp
       print(f"The {cenemy.name} now has {ehp} hp")
-      if (citem.ispecial==3 or cspell.spspecial==6) and random.randint(1,3)==3:
+      if (citem.ispecial1==3 or cspell.spspecial==6) and random.randint(1,3)==3:
        efrozen+=1
        print(f"The {cenemy.name} was frozen!")
       if cspell.spspecial==4 and random.randint(1,3)==3 and estatus ==0:
@@ -653,15 +698,15 @@ def pmaghit():
     if cspell.spspecial==3:
       ehp =0
     if cspell.spspecial==5:
-      pdefmod+=10
-      pmagdefmod+=10
+      pdefmod+=round(pmag/2)
+      pmagdefmod+=round(pmag/2)
       print("You shielded yourself!")
     if cspell.spspecial==7 and cenemy.especial1!=6 and random.randint(1,3)==2 and estatus==0:
        estatus=1
        print(f"The {cenemy.name} was poisoned!")
     magic =False
 def movechoice():
-  global enemy,pdefmod,run,citem,pmana,pdamagemult,ctedef,ehp,php,crit,carmour,efrozen,estatus
+  global enemy,pdefmod,run,citem,pmana,pdamagemult,ctedef,ehp,php,crit,carmour,efrozen,estatus,pstatus
   valid = False
   while not valid:
    choice = input("What will you do? 1: Attack 2: Defend 3: Magic 4: Run 5: Rest 6: Inventory ")
@@ -678,7 +723,7 @@ def movechoice():
      spellchoice()
    elif choice =="4": 
      valid=True
-     if random.randint(1,2)==2:
+     if random.randint(1,4)<4:
        os.system("cls")
        print("You escaped!")
        run=True
@@ -714,12 +759,12 @@ def movechoice():
           print(f"You equipped the {carmour.name}")
         inventory.pop(choice)
         valid = True
-       elif inventory[choice].ispecial==2:
-         pmana+=10
+       elif inventory[choice].ispecial1==2:
+         pmana+=inventory[choice].imana
          print(f"You now have {pmana} mana")
          inventory.pop(choice)
          valid = True
-       elif inventory[choice].ispecial==3:
+       elif inventory[choice].ispecial1==3:
          php+=inventory[choice].iheal
          if inventory[choice]==healpot and pstatus!=0:
            pstatus=0
@@ -727,14 +772,14 @@ def movechoice():
          print(f"You now have {php} hp")
          inventory.pop(choice)
          valid=True
-       elif inventory[choice].ispecial==15:
+       elif inventory[choice].ispecial1==15:
          os.system("cls")
          print("You escaped!")
          run=True
          enemy=False
          inventory.pop(choice)
          newencounter()
-       elif inventory[choice].ispecial==4 or inventory[choice].ispecial==12 or inventory[choice].ispecial==14:
+       elif inventory[choice].ispecial1==4 or inventory[choice].ispecial1==12 or inventory[choice].ispecial1==14:
          print(f"You used the {inventory[choice].name}")
          if random.randint(1,25)==10:
           pdamagemult*=3
@@ -748,10 +793,10 @@ def movechoice():
             damagedealt =0
          print(f"You dealt {damagedealt} damage!")
          ehp-=damagedealt
-         if inventory[choice].ispecial==12:
+         if inventory[choice].ispecial1==12:
           efrozen+=2
           print("The enemy was frozen!")
-         elif inventory[choice].ispecial==14:
+         elif inventory[choice].ispecial1==14:
           estatus=1
           print("The enemy was poisoned!")
          print(f"The {cenemy.name} now has {ehp} hp")
@@ -782,6 +827,185 @@ def gamble():
    elif choice =="n":
      os.system("cls")
      newencounter()
+def workshop():
+  choice =""
+  while choice !="y" and choice!="n":
+    choice=input("You find what appears to be an abandoned workshop. Check it out? (y/n) ")
+  if choice =="n":
+    os.system("cls")
+    newencounter()
+  elif choice=="y":
+    exit = False
+    while not exit:
+      choice = int(input("You spot a crafting bench (1) and a setup for disassembling items (2). Will you use them or leave? (3) "))
+      if choice ==3:
+        exit=True
+        os.system("cls")
+        newencounter()
+      elif choice ==1:
+        crafting()
+      elif choice ==2:
+        disassemble()
+def crafting():
+  global citem,carmour,citem
+  craftinv=inventory.copy()
+  craftitems=[]
+  craft=False
+  succesfulcraft=False
+  numcraft=1
+  while len(craftitems)<4 and not craft:
+   print("Inventory:")
+   for x in range(len(craftinv)):
+        print(f"{x+1}: {craftinv[x].name}")
+   choice = int(input("Which items would you like to craft with? 0 to craft, -1 to exit "))-1
+   if choice != -1 and choice!=-2:
+    craftitems.append(craftinv.pop(choice))
+   if choice==-1:
+     craft=True
+     if len(craftitems)==2 and craftitems[0]==craftitems[1] and craftitems[0].plus !=0:
+       succesfulcraft=True
+       crafteditem=craftitems[0].plus
+       for x in range(2):
+         inventory.pop(inventory.index(craftitems[0]))
+     elif craftitems.count(iron)==3:
+       succesfulcraft=True
+       crafteditem=greatsword
+       for x in range(2):
+         inventory.pop(inventory.index(iron))
+     elif craftitems.count(iron)==1 and craftitems.count(coal)==1:
+       succesfulcraft=True
+       crafteditem=steel
+       inventory.pop(inventory.index(iron))
+       inventory.pop(inventory.index(coal))
+     elif craftitems.count(dagger)==1 and craftitems.count(slimeball)==1:
+       succesfulcraft=True
+       crafteditem=toxdagger
+       inventory.pop(inventory.index(dagger))
+       inventory.pop(inventory.index(slimeball))
+     elif craftitems.count(bomb)==1 and craftitems.count(slimeball)==1:
+       succesfulcraft=True
+       crafteditem=toxbomb
+       inventory.pop(inventory.index(bomb))
+       inventory.pop(inventory.index(slimeball))
+       numcraft=2
+     elif craftitems.count(iron)==2:
+       succesfulcraft=True
+       crafteditem=ironswrd
+       for x in range(2):
+         inventory.pop(inventory.index(iron))
+     elif craftitems.count(wood)==1 and craftitems.count(manacrystal)==1:
+       succesfulcraft=True
+       crafteditem=staff
+       inventory.pop(inventory.index(wood))
+       inventory.pop(inventory.index(manacrystal))
+     elif craftitems.count(wood)==1 and craftitems.count(spikybarb)==1:
+       succesfulcraft=True
+       crafteditem=mace
+       inventory.pop(inventory.index(wood))
+       inventory.pop(inventory.index(spikybarb))
+     elif craftitems.count(wood)==1 and craftitems.count(iron)==1:
+       succesfulcraft=True
+       crafteditem=crossbow
+       inventory.pop(inventory.index(wood))
+       inventory.pop(inventory.index(iron))
+     elif craftitems.count(wood)==1:
+       succesfulcraft=True
+       crafteditem=shield
+       inventory.pop(inventory.index(wood))
+     elif craftitems.count(healpot)==1 and craftitems.count(honey)==1:
+       succesfulcraft=True
+       crafteditem=bighealpot
+       inventory.pop(inventory.index(healpot))
+       inventory.pop(inventory.index(honey)) 
+     elif craftitems.count(dagger)==1 and craftitems.count(bloodvial)==1:
+       succesfulcraft=True
+       crafteditem=vampknife
+       inventory.pop(inventory.index(dagger))
+       inventory.pop(inventory.index(bloodvial)) 
+     elif craftitems.count(steel)==2:
+       succesfulcraft=True
+       crafteditem=gun
+       for x in range(2):
+         inventory.pop(inventory.index(steel))
+     elif craftitems.count(silver)==1 and craftitems.count(iceshard)==1:
+       succesfulcraft=True
+       crafteditem=icewand
+       inventory.pop(inventory.index(silver))
+       inventory.pop(inventory.index(iceshard))
+     elif craftitems.count(silver)==1 and craftitems.count(coal)==1:
+       succesfulcraft=True
+       crafteditem=flamethrower
+       inventory.pop(inventory.index(steel))
+       inventory.pop(inventory.index(coal))
+     elif craftitems.count(iron)==1:
+       succesfulcraft=True
+       crafteditem=dagger
+       inventory.pop(inventory.index(iron))
+     elif craftitems.count(silver)==2:
+       succesfulcraft=True
+       crafteditem=silverblade
+       for x in range(2):
+         inventory.pop(inventory.index(silver))
+     if succesfulcraft==True:
+       for x in range(numcraft):
+        print(f"You crafted a {crafteditem.name}!") 
+        if crafteditem.equippable:
+          if crafteditem.itype==1:
+            if citem!=nothing:
+              inventory.append(citem)
+            citem=crafteditem
+          elif crafteditem.itype==2:
+            if carmour!=nothing:
+              inventory.append(carmour)
+            carmour=crafteditem
+          print(f"You equipped the {crafteditem.name}!")
+        else:
+            inventory.append(crafteditem)
+       numcraft=1
+       time.sleep(1)
+       os.system("cls")
+     else:
+       print("That doesn't make anything...")   
+       time.sleep(1)
+       os.system("cls")
+def disassemble():
+  global carmour,citem
+  print(f"Current weapon: {citem.name} Current armour: {carmour.name}")
+  print("Inventory:")
+  for x in range(len(inventory)):
+        print(f"{x+1}: {inventory[x].name}")
+  choice = int(input("Which items would you like to disassemble? 0 to exit, -1 for current weapon, -2 for current armour "))-1
+  if choice >=0:
+   if len(inventory[choice].components)>0:
+    for x in range(len(inventory[choice].components)):
+     inventory.append((inventory[choice].components)[x])
+     print(f"You got {inventory[choice].components[x].name}")
+    inventory.pop(choice)
+    time.sleep(1)
+    os.system("cls")
+   else:
+     print("That item cannot be disassembled")
+  elif choice ==-2:
+    if len(citem.components)>0:
+     for x in range(len(citem.components)):
+      inventory.append((citem.components)[x])
+      print(f"You got {citem.components[x].name}")
+     citem=nothing
+     time.sleep(1)
+     os.system("cls")
+    else:
+     print("That item cannot be disassembled")
+  elif choice ==-3:
+    if len(carmour.components)>0:
+     for x in range(len(carmour.components)):
+      inventory.append((carmour.components)[x])
+      print(f"You got {carmour.components[x].name}")
+     carmour=nothing
+     time.sleep(1)
+     os.system("cls")
+    else:
+     print("That item cannot be disassembled")
+
 cvalid = False
 while not cvalid:
   pclass =int(input("Choose your class: 1: Knight 2: Mage 3: Archer "))
@@ -821,52 +1045,89 @@ while not cvalid:
     hpgrwth=2
     managrwth=2
     cvalid=True
-dragonscale=itemstats("Dragon Scale",3,10,75,0,3,True,0,0,2)
-cloak = itemstats("Cloak",0,3,50,0,15,True,-1,0,2)
-slimeball=itemstats("Slime Ball",0,0,20,0,0,False,0,0,0)
-manacrystal=itemstats("Mana Crystal",0,0,30,2,0,False,0,0,0)
-ironswrd= itemstats("Iron Sword",10,3,50,0,1,True,0,0,1)
-gun=itemstats("Gun",20,0,100,5,0,True,0,0,1)
-shield = itemstats("Shield",3,12,50,0,0,True,0,0,1)
-swiftdagger=itemstats("Swift Dagger",4,0,75,1,0,True,0,0,1)
-rustdagger=itemstats("Rusty Dagger",5,0,20,0,0,True,0,0,1)
-club=itemstats("Club",15,0,60,0,0,True,0,0,1)
-staff=itemstats("Staff",4,0,75,0,10,True,-1,0,1)
-icewand=itemstats("Ice Wand",0,0,100,3,12,True,2,0,1)
-bloodvial=itemstats("Blood Vial",0,0,30,3,0,False,0,20,0)
-bomb=itemstats("Bomb",50,0,30,4,0,False,0,0,0)
-icebomb=itemstats("Ice Bomb",10,0,60,12,0,False,0,0,0)
-toxbomb=itemstats("Toxic Bomb",5,0,40,14,0,False,0,0,0)
-smokebomb=itemstats("Smoke Bomb",0,0,60,15,0,False,0,0,0)
-bow = itemstats("Bow",7,0,35,5,0,True,0,0,1)
-crossbow = itemstats("Bow",12,0,75,5,0,True,0,0,1)
-honey = itemstats("Honey",0,0,20,3,0,False,0,10,0)
-fish = itemstats("Fish",0,0,30,3,0,False,0,20,0)
-bone = itemstats("Bone",5,0,20,0,0,True,0,0,1)
-scythe=itemstats("Reaper Scythe",17,0,110,6,5,True,0,0,1)
-lthrarmr=itemstats("Leather Armour",0,3,40,0,0,True,0,0,2)
-iceshard=itemstats("Ice Shard",10,0,40,8,0,True,0,0,1)
-assknife=itemstats("Assassin Knife",15,0,75,7,0,True,0,0,1)
-magicsword=itemstats("Magic Sword",12,0,125,9,12,True,0,0,1)
-mechsuit=itemstats("Mech Suit",15,15,200,0,15,True,0,0,2)
-platearmour=itemstats("Plate Armour",0,15,100,0,0,True,1,0,2)
-plasmasword=itemstats("Plasma Sword",14,1,100,10,0,True,0,0,1)
-spikybarb=itemstats("Spiky Barb",0,0,0,11,0,False,0,0,0)
-toxdagger=itemstats("Toxic Dagger",13,0,75,12,0,True,0,0,1)
-silverblade=itemstats("Silver Blade",10,1,75,13,2,True,0,0,1)
-healpot = itemstats("Health Potion",0,0,40,3,0,False,0,20,0)
-nothing=itemstats("Nothing",0,0,0,0,0,True,0,0,0)
+slimeball=itemstats("Slime Ball",0,0,20,0,0,0,False,0,0,0,[],0,0)
+iron=itemstats("Iron",0,0,20,0,0,0,False,0,0,0,[],0,0)
+steel=itemstats("Steel",0,0,40,0,0,0,False,0,0,0,[],0,0)
+wood=itemstats("Wood",0,0,10,0,0,0,False,0,0,0,[],0,0)
+silver=itemstats("Silver",0,0,50,0,0,0,False,0,0,0,[],0,0)
+coal=itemstats("Coal",0,0,10,0,0,0,False,0,0,0,[],0,0)
+manacrystal=itemstats("Mana Crystal",0,0,30,2,0,0,False,0,0,0,[],0,10)
+dscaleplus=itemstats("Dragon Scale+",5,15,150,0,0,6,True,-1,0,2,[],0,0)
+dragonscale=itemstats("Dragon Scale",3,10,75,0,0,3,True,0,0,2,[],dscaleplus,0)
+greatswordplus =itemstats("Greatsword+",20,7,200,0,0,0,True,0,0,1,[steel,iron],0,0)
+greatsword =itemstats("Greatsword",15,5,100,0,0,0,True,0,0,1,[iron,iron],greatswordplus,0)
+cloakplus = itemstats("Cloak+",0,8,100,0,0,20,True,-2,0,2,[],0,0)
+cloak = itemstats("Cloak",0,3,50,0,0,15,True,-1,0,2,[manacrystal],cloakplus,0)
+ironswrd= itemstats("Iron Sword",10,3,50,0,0,0,True,0,0,1,[iron],greatsword,0)
+gunplus=itemstats("Gun+",25,0,200,5,0,0,True,0,0,1,[steel],0,0)
+gun=itemstats("Gun",30,0,100,5,0,0,True,0,0,1,[iron],gunplus,0)
+shieldplus = itemstats("Shield+",6,17,100,0,0,0,True,0,0,1,[steel],0,0)
+shield = itemstats("Shield",3,12,50,0,0,0,True,0,0,1,[iron],shieldplus,0)
+swiftplus=itemstats("Swift Dagger+",8,0,200,1,0,0,True,0,0,1,[steel],0,0)
+swiftdagger=itemstats("Swift Dagger",4,0,100,1,0,0,True,0,0,1,[iron],swiftplus,0)
+daggerplus=itemstats("Dagger+",10,0,70,0,0,0,True,0,0,1,[steel],0,0)
+dagger=itemstats("Dagger",7,0,35,0,0,0,True,0,0,1,[iron],daggerplus,0)
+rustdagger=itemstats("Rusty Dagger",5,0,20,0,0,0,True,0,0,1,[iron],dagger,0)
+clubplus=itemstats("Club+",20,0,120,0,0,0,True,0,0,1,[wood,wood],0,0)
+club=itemstats("Club",15,0,60,0,0,0,True,0,0,1,[wood],clubplus,0)
+staffplus=itemstats("Staff+",6,0,150,0,0,15,True,-2,0,1,[wood,manacrystal],0,0)
+staff=itemstats("Staff",4,0,75,0,0,10,True,-1,0,1,[wood],staffplus,0)
+icewandplus=itemstats("Ice Wand+",0,0,200,3,0,16,True,2,0,0,[manacrystal],0,0)
+icewand=itemstats("Ice Wand",0,0,100,3,0,12,True,2,0,1,[manacrystal],icewandplus,0)
+bloodvial=itemstats("Blood Vial",0,0,30,3,0,0,False,0,20,0,[],0,0)
+bomb=itemstats("Bomb",50,0,30,4,0,0,False,0,0,0,[],0,0)
+icebomb=itemstats("Ice Bomb",10,0,60,12,0,0,False,0,0,0,[],0,0)
+toxbomb=itemstats("Toxic Bomb",5,0,40,14,0,0,False,0,0,0,[],0,0)
+smokebomb=itemstats("Smoke Bomb",0,0,60,15,0,0,False,0,0,0,[],0,0)
+bowplus = itemstats("Bow+",10,0,70,5,0,0,True,0,0,1,[wood,wood],0,0)
+bow = itemstats("Bow",7,0,35,5,0,0,True,0,0,1,[wood],bowplus,0)
+crossbowplus = itemstats("Crossbow+",15,0,140,5,0,0,True,0,0,1,[wood,wood],0,0)
+crossbow = itemstats("Crossbow",12,0,75,5,0,0,True,0,0,1,[wood],crossbowplus,0)
+honey = itemstats("Honey",0,0,20,3,0,0,False,0,10,0,[],0,0)
+fish = itemstats("Fish",0,0,30,3,0,0,False,0,20,0,[],0,0)
+bone = itemstats("Bone",5,0,20,0,0,0,True,0,0,1,[],0,0)
+scytheplus=itemstats("Reaper Scythe+",23,0,220,6,0,10,True,0,0,1,[steel,steel],0,0)
+scythe=itemstats("Reaper Scythe",17,0,110,6,0,5,True,0,0,1,[steel],scytheplus,0)
+lthrplus=itemstats("Leather Armour+",0,6,80,0,0,0,True,0,0,2,[],0,0)
+lthrarmr=itemstats("Leather Armour",0,3,40,0,0,0,True,0,0,2,[],lthrplus,0)
+iceshard=itemstats("Ice Shard",10,0,40,8,0,0,True,0,0,1,[],0,0)
+assknifeplus=itemstats("Assassin Knife+",20,0,150,7,0,0,True,0,0,1,[steel],0,0)
+assknife=itemstats("Assassin Knife",15,0,75,7,0,0,True,0,0,1,[iron],assknifeplus,0)
+magicplus=itemstats("Magic Sword+",15,0,250,9,0,15,True,0,0,1,[steel,manacrystal],0,0)
+magicsword=itemstats("Magic Sword",12,0,125,9,0,12,True,0,0,1,[iron,manacrystal],magicplus,0)
+mechplus=itemstats("Mech Suit+",20,20,400,0,0,20,True,0,0,2,[steel,steel,manacrystal],0,0)
+mechsuit=itemstats("Mech Suit",15,15,200,0,0,15,True,0,0,2,[steel,steel],mechplus,0)
+plateplus=itemstats("Plate Armour+",2,20,200,0,0,0,True,1,0,2,[steel],0,0)
+platearmour=itemstats("Plate Armour",0,15,100,0,0,0,True,1,0,2,[iron],plateplus,0)
+plasmaplus=itemstats("Plasma Sword+",17,1,200,12,0,0,True,0,0,1,[steel,steel],0,0)
+plasmasword=itemstats("Plasma Sword",14,1,100,10,0,0,True,0,0,1,[steel],plasmaplus,0)
+spikybarb=itemstats("Spiky Barb",0,0,0,11,0,0,False,0,0,0,[],0,0)
+toxdaggerplus=itemstats("Toxic Dagger+",10,0,150,12,0,0,True,0,0,1,[steel],0,0)
+toxdagger=itemstats("Toxic Dagger",7,0,75,12,0,0,True,0,0,1,[iron],toxdaggerplus,0)
+silverplus=itemstats("Silver Blade+",15,1,150,13,0,2,True,0,0,1,[silver,silver],0,0)
+silverblade=itemstats("Silver Blade",10,1,75,13,0,2,True,0,0,1,[silver],silverplus,0)
+healpot = itemstats("Health Potion",0,0,40,3,0,0,False,0,30,0,[],0,0)
+bighealpot=itemstats("Big Health Potion",0,0,80,3,0,0,False,0,100,0,[],0,0)
+manapot=itemstats("Mana Potion",0,0,70,2,0,0,False,0,30,0,[],0,50)
+maceplus = itemstats("Mace+",15,0,100,0,0,0,True,0,0,1,[steel],0,0)
+mace = itemstats("Mace",10,0,50,0,0,0,True,0,0,1,[iron],maceplus,0)
+vampplus=itemstats("Vampire Knife+",13,0,200,14,0,2,True,0,0,1,[steel],0,0)
+vampknife=itemstats("Vampire Knife",9,0,100,14,0,1,True,0,0,1,[iron],vampplus,0)
+pick=itemstats("Pickaxe",6,0,40,0,0,0,True,0,0,1,[iron],0,0)
+flamethrowerplus=itemstats("Flamethrower+",0,0,200,15,1,20,True,0,0,1,[steel,coal],0,0)
+flamethrower=itemstats("Flamethrower",0,0,100,15,1,15,True,0,0,1,[steel],flamethrowerplus,0)
+nothing=itemstats("Nothing",0,0,0,0,0,0,True,0,0,0,[],0,0)
 bees = enemystats("Bee Swarm",17,5,10,15,25,0,0,honey,4)
 skeleton = enemystats("Skeleton",20,7,17,10,50,0,0,bone,3)
 dragon=enemystats("Dragon",35,20,50,100,150,4,0,dragonscale,20)
 slime = enemystats("Slime",16,10,20,10,20,6,0,slimeball,4)
-bandit= enemystats("Bandit",20,3,20,40,20,0,0,rustdagger,5)
+bandit= enemystats("Bandit",23,3,20,40,20,0,0,rustdagger,5)
 troll = enemystats("Troll",25,15,20,30,30,1,0,club,7)
 mage = enemystats("Mage",10,5,15,30,20,2,0,manacrystal,30)
 thingy=enemystats("Thingy",16,5,40,30,30,3,0,0,10)
-golem = enemystats("Golem",25,30,30,60,60,1,0,0,5)
+golem = enemystats("Golem",30,30,30,60,60,1,0,iron,5)
 icewitch= enemystats("Ice Witch",10,7,20,50,50,2,1,icewand,30)
-icegolem=enemystats("Ice Golem",20,20,35,60,50,0,1,iceshard,15)
+icegolem=enemystats("Ice Golem",20,20,35,60,50,0,1,iceshard,10)
 vampire = enemystats("Vampire",25,10,30,50,70,5,2,bloodvial,20)
 mech = enemystats("Mech",25,25,50,100,100,4,0,mechsuit,30)
 mimic=enemystats("Mimic",20,15,20,75,50,0,0,ironswrd,10)
@@ -876,6 +1137,8 @@ assassin=enemystats("Assassin",25,10,25,40,40,9,0,assknife,10)
 spikeball=enemystats("Spike Ball",15,15,20,30,30,10,0,spikybarb,5)
 demon=enemystats("Demon",20,15,40,60,60,4,2,0,25)
 mercenary=enemystats("Mercenary",20,10,30,70,50,0,0,crossbow,10)
+ent=enemystats("Ent",25,15,30,50,40,0,0,wood,10)
+miner=enemystats("Miner",17,10,20,30,20,0,0,pick,5)
 magicmissile = spellstats("Magic Missile",5,0,3,0)
 thunderbolt = spellstats("Thunderbolt",7,0,4,0)
 heal=spellstats("Heal",0,round(pmaxhp/2),5,2)
@@ -895,6 +1158,7 @@ patkmod=0
 pdefmod=0#
 eatkmod=0
 edefmod=0
+pmagdefmod=0
 #while True:
  #y=input()
  #y=y.lower()
@@ -906,7 +1170,7 @@ pstatus =0
 estatus = 0
 crit=False
 gold=50
-xp=1
+xp=0
 level=1
 pmana=pmaxmana
 php=pmaxhp
