@@ -4,7 +4,6 @@ import os
 class enemystats():
     def __init__(self,name,eatk,edef,emaxhp,goldrp,expdrp,especial1,especial2,itemdrop,emag):
         self.name =name
-        self.type=1
         self.eatk=eatk
         self.edef=edef
         self.emaxhp=emaxhp
@@ -38,6 +37,52 @@ class spellstats():
     self.spheal=spheal
     self.spmanacost = spmanacost
     self.spspecial=spspecial
+def enemyencounter():
+   global enemy,cenemy
+   enemy=True
+   z=random.randint(1,21)
+   if z ==1:
+    cenemy= bees
+   elif z==2:
+    cenemy= skeleton
+   elif z == 3:
+    cenemy = dragon
+   elif z==4:
+    cenemy = slime
+   elif z == 5:
+    cenemy=bandit
+   elif z ==6:
+     cenemy=troll
+   elif z==7:
+     cenemy=thingy
+   elif z ==8:
+     cenemy=mage
+   elif z ==9:
+     cenemy=golem
+   elif z ==10:
+     cenemy=icewitch
+   elif z ==11:
+     cenemy=vampire
+   elif z ==12:
+     cenemy=mech
+   elif z== 13:
+     cenemy=bomber
+   elif z ==14:
+     cenemy=ghost
+   elif z == 15:
+     cenemy=icegolem
+   elif z == 16:
+     cenemy=assassin
+   elif z==17:
+     cenemy=spikeball
+   elif z==18:
+     cenemy=demon
+   elif z ==19:
+     cenemy=mercenary
+   elif z==20:
+     cenemy=ent
+   elif z ==21:
+     cenemy=miner
 def search(y):
    if y=="bees":
     thing=bees
@@ -58,60 +103,62 @@ def damage(atk,defence):
     d=  (atk - defence)
     return d
 def phit():
-    global ehp, pdamagemult,crit,ctpdef,cteatk,pstatus,efrozen,estatus,php,pmag
-    ctpatk=patk+citem.iatk+patkmod+carmour.iatk
-    ctpdef=pdef+citem.idef+pdefmod+carmour.idef
-    cteatk=cenemy.eatk+eatkmod
-    ctedef=cenemy.edef + edefmod
+    global ehp, pdamagemult,crit,ctpdef,cteatk,pstatus,efrozen,estatus,php,pmag,patkmod,edefmod
     attacks=1
     if citem.ispecial1==1:
       attacks+=1
+    if pclass==4:
+      attacks+=1
     for i in range(attacks):
-     if (random.randint(1,25)==10 and citem.ispecial1!=7) or (random.randint(1,5)==5 and citem.ispecial1==7):
-      pdamagemult*=3
-      crit=True
-      print("Critical hit!")
-     if citem.ispecial1==13 and cenemy.especial2==2:
-       pdamagemult*=2
-     if citem.ispecial1==9:
-       damagedealt=round(damage(round((ctpatk+pmag+citem.imag+carmour.imag)/2)*pdamagemult,round((ctedef+cenemy.emag)/2)))
-     elif citem.ispecial1==10:
-       damagedealt =round(damage(ctpatk*pdamagemult,cenemy.emag))
-     elif citem.ispecial1==15:
-       damagedealt=round(damage(pmag+citem.imag+carmour.imag*pdamagemult,cenemy.emag))
-     else:
-       damagedealt =round(damage(ctpatk*pdamagemult,ctedef))
-     if crit:
-      pdamagemult/=3
-      crit=False
-     if random.randint(1,2)==1 and citem.ispecial2==1:
-         estatus=2
-         print(f"The {cenemy.name} was burned!")
-     if citem.ispecial1==13 and cenemy.especial2==2:
-      pdamagemult/=2
-     if damagedealt<0 or (cenemy.especial1==8 and citem.ispecial1!=15):
-      damagedealt =0
-     print(f"You dealt {damagedealt} damage!")
-     ehp-=damagedealt
-     if cenemy.especial1==6 and random.randint(1,4)==1 and pstatus==0 and citem.ispecial1!=5 and citem.ispecial1!=15:
-      print("You were poisoned!")
-      pstatus = 1
-     if cenemy.especial1==10 and citem.ispecial1!=5:
-       php-=5
-       print(f"You took 5 damage due to spikes! You now have {php} hp")
-       hpcheck()
-     if citem.ispecial1==8 and random.randint(1,3)==3 and cenemy.especial2!=1 and cenemy.especial1!=8:
-       efrozen+=1
-       print(f"The {cenemy.name} was frozen!")
-     if citem.ispecial1==12 and cenemy.especial1!=6 and random.randint(1,3)==2 and estatus==0 and cenemy.especial1!=8:
-       estatus=1
-       print(f"The {cenemy.name} was poisoned!")
-     if citem.ispecial1==14:
-       php+=round(damagedealt/2)
-       print(f"You healed {round(damagedealt/2)}hp!")
-     print(f"The {cenemy.name} now has {ehp} hp")
-     if ehp<=0:
-       break
+     if php>0:
+      ctpatk=patk+citem.iatk+patkmod+carmour.iatk
+      ctedef=cenemy.edef + edefmod
+      if (random.randint(1,25)==10 and citem.ispecial1!=7) or (random.randint(1,5)==5 and citem.ispecial1==7):
+        pdamagemult*=3
+        crit=True
+        print("Critical hit!")
+      if citem.ispecial1==13 and cenemy.especial2==2:
+        pdamagemult*=2
+      if citem.ispecial1==9:
+        damagedealt=round(damage(round((ctpatk+pmag+citem.imag+carmour.imag)/2)*pdamagemult,round((ctedef+cenemy.emag)/2)))
+      elif citem.ispecial1==10:
+        damagedealt =round(damage(ctpatk*pdamagemult,cenemy.emag))
+      elif citem.ispecial1==15:
+        damagedealt=round(damage(pmag+citem.imag+carmour.imag*pdamagemult,cenemy.emag))
+      else:
+        damagedealt =round(damage(ctpatk*pdamagemult,ctedef))
+      if crit:
+        pdamagemult/=3
+        crit=False
+      if random.randint(1,2)==1 and citem.ispecial2==1:
+          estatus=2
+          print(f"The {cenemy.name} was burned!")
+      if citem.ispecial1==13 and cenemy.especial2==2:
+        pdamagemult/=2
+      if damagedealt<0 or (cenemy.especial1==8 and citem.ispecial1!=15):
+        damagedealt =0
+      print(f"You dealt {damagedealt} damage!")
+      ehp-=damagedealt
+      if cenemy.especial1==6 and random.randint(1,4)==1 and pstatus==0 and citem.ispecial1!=5 and citem.ispecial1!=15:
+        print("You were poisoned!")
+        pstatus = 1
+      if cenemy.especial1==10 and citem.ispecial1!=5:
+        php-=5
+        print(f"You took 5 damage due to spikes! You now have {php} hp")
+        hpcheck()
+      if citem.ispecial1==8 and random.randint(1,3)==3 and cenemy.especial2!=1 and cenemy.especial1!=8:
+        efrozen+=1
+        print(f"The {cenemy.name} was frozen!")
+      if citem.ispecial1==12 and cenemy.especial1!=6 and random.randint(1,3)==2 and estatus==0 and cenemy.especial1!=8:
+        estatus=1
+        print(f"The {cenemy.name} was poisoned!")
+      if citem.ispecial1==14 and damagedealt>0:
+        php+=round(damagedealt/2)
+        print(f"You healed {round(damagedealt/2)} hp!")
+        patkmod+=1
+      print(f"The {cenemy.name} now has {ehp} hp")
+      if ehp<=0:
+        break
 def ehit():
   global php,edamagemult,crit,ctpatk,ctedef,frozen,efrozen,ehp,eatkmod,edefmod,pstatus,pdefmod,pmagdefmod
   ctpatk=patk+citem.iatk+patkmod+carmour.iatk
@@ -176,12 +223,12 @@ def chest():
      x=random.randint(1,6)
      if x  ==1:
        gold+=50
-       os.system("cls")
+       os.system("clear")
        print("It contained 50 gold!")
        time.sleep(1)
        newencounter()
      elif x<=3:
-       os.system("cls")
+       os.system("clear")
        x=random.randint(1,14)
        if x ==1:
          y=ironswrd
@@ -242,7 +289,7 @@ def chest():
        turncount=0
        enemy=True
      elif x==5:
-       os.system("cls")
+       os.system("clear")
        print("It's a trap!")
        php-= 10 
        print("You took 10 damage")
@@ -252,12 +299,12 @@ def chest():
        time.sleep(1)
        newencounter()
      elif x==6:
-       os.system("cls")
+       os.system("clear")
        print("It's empty...")
        time.sleep(1)
        newencounter()
    elif choice =="n":
-     os.system("cls")
+     os.system("clear")
      print("Better safe than sorry...")
      newencounter()
 def fishinghole():
@@ -321,7 +368,7 @@ def fishinghole():
            inventory.append(y)
     elif choice =="n":
       exit =True
-  os.system("cls")
+  os.system("clear")
   newencounter()
 def newencounter():
   global gold,xp,ehp,cenemy,php,level,patk,pdef,pmaxhp,enemy,edamagemult,turncount,citem,pmag,pmaxmana,pmana,patkmod,pdefmod,eatkmod,edefmod,atkgrwth,defgrwth,maggrwth,managrwth,hpgrwth,efrozen,carmour,emaxhp,estatus,run
@@ -385,10 +432,10 @@ def newencounter():
      g=random.randint(1,3)
     else:
       g=random.randint(1,4)
-    if g==1 and len(spells)<10:
+    if g==1 and len(spells)<12:
       valid = False
       while not valid:
-       y=random.randint(1,10)
+       y=random.randint(1,12)
        if y==1:
          newspell=heal
        elif y==2:
@@ -409,6 +456,10 @@ def newencounter():
          newspell=blizzard
        elif y ==10:
          newspell=sludge
+       elif y==11:
+         newspell=teleport
+       elif y==12:
+         newspell=selfdestruct
        if not newspell in spells:
          valid = True
          spells.append(newspell)
@@ -417,7 +468,7 @@ def newencounter():
    time.sleep(1)
   enemy=False
   if not run:
-   os.system("cls")
+   os.system("clear")
   y= random.randint(1,6)
   if y==1:
     if pick in inventory or citem==pick:
@@ -439,50 +490,7 @@ def newencounter():
     elif y==10:
       mine()
   else:
-   enemy=True
-   z=random.randint(1,21)
-   if z ==1:
-    cenemy= bees
-   elif z==2:
-    cenemy= skeleton
-   elif z == 3:
-    cenemy = dragon
-   elif z==4:
-    cenemy = slime
-   elif z == 5:
-    cenemy=bandit
-   elif z ==6:
-     cenemy=troll
-   elif z==7:
-     cenemy=thingy
-   elif z ==8:
-     cenemy=mage
-   elif z ==9:
-     cenemy=golem
-   elif z ==10:
-     cenemy=icewitch
-   elif z ==11:
-     cenemy=vampire
-   elif z ==12:
-     cenemy=mech
-   elif z== 13:
-     cenemy=bomber
-   elif z ==14:
-     cenemy=ghost
-   elif z == 15:
-     cenemy=icegolem
-   elif z == 16:
-     cenemy=assassin
-   elif z==17:
-     cenemy=spikeball
-   elif z==18:
-     cenemy=demon
-   elif z ==19:
-     cenemy=mercenary
-   elif z==20:
-     cenemy=ent
-   elif z ==21:
-     cenemy=miner
+   enemyencounter()
    ehp=cenemy.emaxhp
    print(f"You encountered a {cenemy.name}! You have {php}/{pmaxhp} hp")
    turncount=0
@@ -495,7 +503,7 @@ def mine():
   for x in range(3):
     inventory.append(coal)
   time.sleep(1)
-  os.system("cls")
+  os.system("clear")
   newencounter()
 def bombshop():
   global gold
@@ -524,15 +532,15 @@ def bombshop():
             print("Insufficent gold")
         elif choice2 =="n":
           exit = True    
-      os.system("cls")
+      os.system("clear")
       newencounter()  
     if choice =="n":
-     os.system("cls")
+     os.system("clear")
      print("You have enough issues as is")  
      newencounter()
 def shop():
   global gold,xp,patk,php,pmaxhp,citem,pstatus,carmour
-  os.system("cls")
+  os.system("clear")
   print("You found a shop!")
   exit = False
   stock=[]
@@ -582,7 +590,7 @@ def shop():
   while not exit:
     if len(stock)==0:
       exit=True
-      os.system("cls")
+      os.system("clear")
       newencounter()
     print(f"You have {gold} gold and {php}/{pmaxhp} hp. Your current equipped weapon is {citem.name} and armour is {carmour.name}")
     print("The shop is selling:")
@@ -602,7 +610,7 @@ def shop():
             if carmour!=nothing:
               inventory.append(carmour)
             carmour=stock[choice]
-          os.system("cls")
+          os.system("clear")
           print(f"You equipped the {stock[choice].name}!")
          else:
             inventory.append(stock[choice])
@@ -611,10 +619,10 @@ def shop():
           print("Insufficient gold!")
     elif choice==-1:
       exit=True
-      os.system("cls")
+      os.system("clear")
       newencounter()
     elif choice ==-2:
-      os.system("cls")
+      os.system("clear")
       print(f"Equipped weapon: {citem.name} Equipped armour: {carmour.name}")
       print("Inventory:")
       for x in range(len(inventory)):
@@ -641,7 +649,7 @@ def spellchoice():
       print(f"{i+1}: {spells[i].name} ({spells[i].spmanacost+citem.manacostmod+carmour.manacostmod} mana)")
     choice = int(input(f"What spell will you use? You have {pmana} mana. 0 to exit "))-1
     if choice == -1:
-        os.system("cls")
+        os.system("clear")
         valid = True
         movechoice()
     elif choice <= len(spells)-1:
@@ -654,7 +662,7 @@ def spellchoice():
     if magic == True:
       pmaghit()
 def pmaghit():
-    global ehp, pdamagemult,crit,ctpdef,cteatk,pmag,emag,magic,pmana,citem,php,efrozen,pstatus,carmour,estatus,pmagdefmod,pdefmod
+    global ehp, pdamagemult,crit,ctpdef,cteatk,pmag,emag,magic,pmana,citem,php,efrozen,pstatus,carmour,estatus,pmagdefmod,pdefmod,run,enemy
     attacks=1
     print(f"You used {cspell.name}!")
     if cspell.spdamage>0:
@@ -704,13 +712,24 @@ def pmaghit():
     if cspell.spspecial==7 and cenemy.especial1!=6 and random.randint(1,3)==2 and estatus==0:
        estatus=1
        print(f"The {cenemy.name} was poisoned!")
+    if cspell.spspecial==8:
+         os.system("clear")
+         print("You escaped!")
+         run=True
+         enemy=False
+         newencounter()
+    if cspell.spspecial==9:
+      php-=round(damagedealt/2)
+      print(f"You took {round(damagedealt/2)} recoil damage!")
+      print(f"You have {php} hp")
+      hpcheck()
     magic =False
 def movechoice():
   global enemy,pdefmod,run,citem,pmana,pdamagemult,ctedef,ehp,php,crit,carmour,efrozen,estatus,pstatus
   valid = False
   while not valid:
    choice = input("What will you do? 1: Attack 2: Defend 3: Magic 4: Run 5: Rest 6: Inventory ")
-   os.system("cls")
+   os.system("clear")
    if choice =="1":
      valid = True
      phit()
@@ -724,7 +743,7 @@ def movechoice():
    elif choice =="4": 
      valid=True
      if random.randint(1,4)<4:
-       os.system("cls")
+       os.system("clear")
        print("You escaped!")
        run=True
        enemy=False
@@ -773,7 +792,7 @@ def movechoice():
          inventory.pop(choice)
          valid=True
        elif inventory[choice].ispecial1==15:
-         os.system("cls")
+         os.system("clear")
          print("You escaped!")
          run=True
          enemy=False
@@ -807,7 +826,7 @@ def movechoice():
        else:
          print("Nothing happened")
      else:
-       os.system("cls")    
+       os.system("clear")    
 def gamble():
   global gold
   choice=""
@@ -819,20 +838,20 @@ def gamble():
       spent=int(input(f"You have {gold} gold, how much will you spend? "))
      gold-=spent
      dice=random.randint(1,20)
-     os.system("cls")
+     os.system("clear")
      print(f"You rolled {dice}! The machine spat out {round(spent*(dice/10))} gold")
      gold+=round(spent*(dice/10))
      time.sleep(1)
      newencounter()
    elif choice =="n":
-     os.system("cls")
+     os.system("clear")
      newencounter()
 def workshop():
   choice =""
   while choice !="y" and choice!="n":
     choice=input("You find what appears to be an abandoned workshop. Check it out? (y/n) ")
   if choice =="n":
-    os.system("cls")
+    os.system("clear")
     newencounter()
   elif choice=="y":
     exit = False
@@ -840,7 +859,7 @@ def workshop():
       choice = int(input("You spot a crafting bench (1) and a setup for disassembling items (2). Will you use them or leave? (3) "))
       if choice ==3:
         exit=True
-        os.system("cls")
+        os.system("clear")
         newencounter()
       elif choice ==1:
         crafting()
@@ -963,11 +982,11 @@ def crafting():
             inventory.append(crafteditem)
        numcraft=1
        time.sleep(1)
-       os.system("cls")
+       os.system("clear")
      else:
        print("That doesn't make anything...")   
        time.sleep(1)
-       os.system("cls")
+       os.system("clear")
 def disassemble():
   global carmour,citem
   print(f"Current weapon: {citem.name} Current armour: {carmour.name}")
@@ -982,7 +1001,7 @@ def disassemble():
      print(f"You got {inventory[choice].components[x].name}")
     inventory.pop(choice)
     time.sleep(1)
-    os.system("cls")
+    os.system("clear")
    else:
      print("That item cannot be disassembled")
   elif choice ==-2:
@@ -992,7 +1011,7 @@ def disassemble():
       print(f"You got {citem.components[x].name}")
      citem=nothing
      time.sleep(1)
-     os.system("cls")
+     os.system("clear")
     else:
      print("That item cannot be disassembled")
   elif choice ==-3:
@@ -1002,13 +1021,13 @@ def disassemble():
       print(f"You got {carmour.components[x].name}")
      carmour=nothing
      time.sleep(1)
-     os.system("cls")
+     os.system("clear")
     else:
      print("That item cannot be disassembled")
 
 cvalid = False
 while not cvalid:
-  pclass =int(input("Choose your class: 1: Knight 2: Mage 3: Archer "))
+  pclass =int(input("Choose your class: 1: Knight 2: Mage 3: Archer 4: Rogue "))
   if pclass==1:
     patk=15
     pmag=4
@@ -1043,6 +1062,18 @@ while not cvalid:
     maggrwth=2
     defgrwth=2
     hpgrwth=2
+    managrwth=2
+    cvalid=True
+  elif pclass ==4:
+    patk=10
+    pmag=8
+    pdef=6
+    pmaxhp=40
+    pmaxmana=15
+    atkgrwth=3
+    maggrwth=2
+    defgrwth=1
+    hpgrwth=1
     managrwth=2
     cvalid=True
 slimeball=itemstats("Slime Ball",0,0,20,0,0,0,False,0,0,0,[],0,0)
@@ -1081,7 +1112,7 @@ toxbomb=itemstats("Toxic Bomb",5,0,40,14,0,0,False,0,0,0,[],0,0)
 smokebomb=itemstats("Smoke Bomb",0,0,60,15,0,0,False,0,0,0,[],0,0)
 bowplus = itemstats("Bow+",10,0,70,5,0,0,True,0,0,1,[wood,wood],0,0)
 bow = itemstats("Bow",7,0,35,5,0,0,True,0,0,1,[wood],bowplus,0)
-crossbowplus = itemstats("Crossbow+",15,0,140,5,0,0,True,0,0,1,[wood,wood],0,0)
+crossbowplus = itemstats("Crossbow+",15,0,140,5,0,0,True,0,0,1,[wood,steel],0,0)
 crossbow = itemstats("Crossbow",12,0,75,5,0,0,True,0,0,1,[wood],crossbowplus,0)
 honey = itemstats("Honey",0,0,20,3,0,0,False,0,10,0,[],0,0)
 fish = itemstats("Fish",0,0,30,3,0,0,False,0,20,0,[],0,0)
@@ -1149,6 +1180,8 @@ fireball= spellstats("Fireball",10,0,5,4)
 barrier = spellstats("Barrier",0,0,5,5)
 blizzard = spellstats("Blizzard",20,0,7,6)
 sludge=spellstats("Sludge Blast",9,0,7,7)
+teleport=spellstats("Teleport",0,0,9,8)
+selfdestruct=spellstats("Self Destruct",50,0,10,9)
 thing=bees
 alive = True
 magic = False
@@ -1175,19 +1208,18 @@ level=1
 pmana=pmaxmana
 php=pmaxhp
 inventory=[]
+spells=[]
+citem=nothing
+carmour=nothing
 if pclass==2:
- spells=[magicmissile]
-else:
-  spells=[]
-if pclass==3:
+ spells.append(magicmissile)
+elif pclass==3:
   citem=bow
-else:
- citem=nothing
-carmour = nothing
+elif pclass==4:
+ citem=vampknife
 attacks=1
-cenemy=skeleton
+enemyencounter()
 ehp=cenemy.emaxhp
-enemy=True
 run =False
 asdfj=True
 print(f"You encountered a {cenemy.name}!")
